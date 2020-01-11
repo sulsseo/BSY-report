@@ -1,0 +1,9 @@
+# folders
+.vscode
+.ipynb_checkpoints
+data
+
+
+# files
+Pipfile
+Pipfile.lock

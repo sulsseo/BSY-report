@@ -29,19 +29,35 @@ HorribleDancer
 
 ```
 
-So now I have a bunch of question which can be answered after pcap analysis.
+So now we have a bunch of question which can be answered after pcap analysis.
 
 ### pcap analysis
 
-From the obtained questions, we can estimate that the pcap file is capturing some kind of attack. We know this attack may use Command and Control botnet, and we can detect this by some periodically repeated action. When we open the capture file in most popular capture analysis software [Wireshark](https://www.wireshark.org/), it's clear that it has precisely 10000 records and 2:07 hours duration. 
+From the obtained questions, we can estimate that the pcap file is capturing some kind of attack. We know this attack may use Command and Control botnet, and we can detect this by some periodically repeated action. When we open the capture file in most popular capture analysis software [Wireshark](https://www.wireshark.org/), it's clear that it has precisely 10000 records and 2:07 hours duration.
 
 ![img01](img/img01.png)
 
+As we can see from the table above, minor traffic is IPv6 and IPv4 UDP, so it takes a while to guess this is regular traffic. The other 84% of the traffic is TCP communication and even TLS, so we cannot read what is going on there. Apply filter `TCP and not TLS` screen remaining traffic. Next, we are trying to find out which IP address belongs to whom. From this part, we use Google to see some additional information about IPs and WolframAlpha to find the owner. Notes from this part:
+
+```text
+10.0.2.15 - moje ip
+74.125.206.94, 216.58.206.14, 90.182.119.13 - google
+52.18.63.80 - amazon
+209.197.3.15 - suspicious
+37.48.125.108 - suspicious
+104.16.85.20, 104.20.30.249 - cloudflare
+45.33.109.129 - http://clker.com clipart
+```
+
+![img01c](img/img01c.png)
+
+From the HTTP traffic, we can detect partitions of the file being downloaded but not the whole package. So let's try to answer questions to see if we are on a good way to complete.
+
 ```text
 <Grinch> Please provide your token
-Horrible  Dancer
+HorribleDancer
 <Grinch> What is the IP of the C&C?
-ff02::c
+209.197.3.15
 <Grinch> What is the periodicity of the communication in seconds? (Remove decimals, for example 122.7 becomes 122)
 1
 <Grinch> How many times did the victim computer connect to the C&C IP?
@@ -51,11 +67,29 @@ No
 You answered correctly 1 out of 4 questions.
 ```
 
-TODO
+Nope. It still needs some time to analyze.
 
-```text
-TODO
-```
+While we insert parts of capture to Google at one point, it returns the result from [www.packettotal.com](www.packettotal.com). It is interesting, so let's look inside. We can find that the record on Packet Total is the same as our pcap.
+
+[packettotal record](https://packettotal.com/app/analysis?id=fb1f4903ca5852da9d6baf9b38c4afed)
+
+Packet Total helps me to determine what is going on in this pcap. It marks `37.48.125.108` as an interesting IP address with a lot of connections.
+
+![img01d](img/img01d.png)
+
+So we tried to add some filters to look at this IP address.
+
+![img01e](img/img01e.png)
+
+What is it? Can you see the time column? It looks like a periodical conversation with this IP address. One of the questions is on the periodicity of C&C server. The `37.48.125.108` machine may be botnet's home server. Let's zoom to TCP conversation with this IP:
+
+![img01g](img/img01g.png)
+
+Yes. This looks pretty weird. It is a periodical heartbeat in the first connection. After this, it stops for approximately one hour and then:
+
+![img01f](img/img01f.png)
+
+A new connection with the message above. Maybe this is the botnet activation sequence. Now we may have all the answers to our questions. C&C server IP is now clear also the periodicity of the communication. And from pcap we can see two initiated connections. Let's try it:
 
 ```text
 <Grinch> Please provide your token
@@ -74,6 +108,8 @@ Knock knock... Your VM might be handy.
 Hint: MzcgMzAgMzAgMzAgMmMgMzggMzAgMzAgMzAgMmMgMzkgMzAgMzAgMzAgMmMgMzEgMzAgMzAgMzAgMzA=
 <Grinch> This is the end of stage 1. You rock!
 ```
+
+Yes. Successful. We continue to the next stage.
 
 ## ⚡️ Second stage
 
@@ -276,7 +312,7 @@ Now we can log in and look at what is in my home.
 joy@grinchLair: ~ $ ls
 Stocking
 
-joy@grinchLair: ~$ cat Stocking
+joy@grinchLair: ~ $ cat Stocking
 
 For Final stage (Stage 4) you should desing and implement a C&C bot using the github repo/github gist(https://gist.github.com/).
 Design your bot such that it can perform following tasks in the target machine:

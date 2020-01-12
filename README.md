@@ -71,7 +71,7 @@ Nope. It still needs some time to analyze.
 
 While we insert parts of capture to Google at one point, it returns the result from [www.packettotal.com](www.packettotal.com). It is interesting, so let's look inside. We can find that the record on Packet Total is the same as our pcap.
 
-[packettotal record](https://packettotal.com/app/analysis?id=fb1f4903ca5852da9d6baf9b38c4afed)
+[Packet Total record](https://packettotal.com/app/analysis?id=fb1f4903ca5852da9d6baf9b38c4afed)
 
 Packet Total helps me to determine what is going on in this pcap. It marks `37.48.125.108` as an interesting IP address with a lot of connections.
 
@@ -113,7 +113,7 @@ Yes. Successful. We continue to the next stage.
 
 ## ⚡️ Second stage
 
-Okay great. The first stage ends with the message includes some hints and ciphers. We now have some number that looks kind of random, but it definitely hides some piece of information. One of the first things I personally do if I don't know I use Google search. Let's try to find `3232235903` on Google and see.
+Okay great. The first stage ends with the message includes some hints and ciphers. We now have some number that looks kind of random, but it definitely hides some piece of information. One of the first things I personally do if I don't know I use Google search. Let's try to find `3232235903` on Google and [see](https://lmgtfy.com/?q=3232235903&s=d).
 
 ![ip](img/ip.gif)
 
@@ -177,7 +177,7 @@ A quick look for what this service is. And it looks like a website hosting.
 </html>
 ```
 
-After a more in-depth analysis of this website, here is nothing unusual. Compare to the original `www.asdf.com` website accessible from the public internet, this clone is more or less the same as the original site. Let's continue with the port analysis.
+After a more in-depth analysis of this website, here is nothing unusual. Compare to the original [www.asdf.com](www.asdf.com) website accessible from the public internet, this clone is more or less the same as the original site. Let's continue with the port analysis.
 
 We have a remaining ports `902` and `6667`. On port `902` is another ssh-agent. Not interesting for us. After accessing the last port, we are getting short ASCII animation. Which unfortunately hides no new information on our treasure path.
 
@@ -294,7 +294,7 @@ Now it is crystal clear. The brute force is actually a solution but using a huge
 
 ```bash
 $ nmap -sS -sV -p 22 192.168.1.127 -v -n --script ssh-brute --script-args
-s userdb=users,passdb=1000000.txt,brute.firstonly=true,unpwdb.timelimit=0
+s userdb=users,passdb=1000000.txt,brute.firstonly=true,unpwdb.timelimit=0
 ```
 
 after while we have results:

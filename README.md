@@ -330,3 +330,11 @@ Good luck and Merry Xmas!
 And it is done. This stage was short in terms of work but not in terms of spend time.
 
 ## ⚡️ Fourth stage
+
+Unfortunately, we have no time to implement this bot. 🙁
+
+## Summary
+
+The bonus task was a great summary of the whole Security Systems course, and it compels a man to use a lot of acquired knowledge from the semester. As a first stage - pcap analysis. This stage was at the beginning, like looking into the crystal ball, but it helps us to improve our skills and discover new technics in malware detection. Some part was a little bit tricky, and the significant benefit was Packet Total in this case. The next challenge was Port Knocking, which was an absolutely new experience and a real problem to solve. Then come, from my point of view, the most exciting part with an exploit in Debian Buster, which was really good prepared. The crucial fact, in this case, was to realize that the whole vulnerable server on port `8080` running in Docker container due to we cannot see users from the operating system under this Docker environment. The final part, in this way, was the grand finale in the form of a brute force attack. Unfortunately, we already have no more time to implement the C&C bot. So that is all, final exams are coming.
+
+**Thank you for a great and inspiring course. It was a lot of fun with a lot of experience.**

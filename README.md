@@ -55,7 +55,7 @@ From the HTTP traffic, we can detect partitions of the file being downloaded but
 
 ```text
 <Grinch> Please provide your token
-HorribleDancer
+HorribleDancer
 <Grinch> What is the IP of the C&C?
 209.197.3.15
 <Grinch> What is the periodicity of the communication in seconds? (Remove decimals, for example 122.7 becomes 122)
@@ -325,6 +325,35 @@ Design your bot such that it can perform following tasks in the target machine:
 And report results back to the control server.
 
 Good luck and Merry Xmas!
+---------------------------------------------------------------------------------------------------------------------------------
+       _____________,--,
+      | | | | | | |/ .-.\   HANG IN THERE
+      |_|_|_|_|_|_/ /   `.      SANTA
+       |_|__|__|_; |      \
+       |___|__|_/| |     .'`}
+       |_|__|__/ | |   .'.'`\
+       |__|__|/  ; ;  / /    \.-"-.
+       ||__|_;   \ \  ||    /`___. \
+       |_|___/\  /;.`,\\   {_'___.;{}
+       |__|_/ `;`__|`-.;|  |C` e e`\
+       |___`L  \__|__|__|  | `'-o-' }
+       ||___|\__)___|__||__|\   ^  /`\
+       |__|__|__|__|__|_{___}'.__.`\_.'}
+       ||___|__|__|__|__;\_)-'`\   {_.-;
+       |__|__|__|__|__|/` (`\__/     '-'
+       |_|___|__|__/`      |
+-jgs---|__|___|__/`         \-------------------
+-.__.-.|___|___;`            |.__.-.__.-.__.-.__
+  |     |     ||             |  |     |     |
+-' '---' '---' \             /-' '---' '---' '--
+     |     |    '.        .' |     |     |     |
+'---' '---' '---' `-===-'`--' '---' '---' '---'
+  |     |     |     |     |     |     |     |
+-' '---' '---' '---' '---' '---' '---' '---' '--
+     |     |     |     |     |     |     |     |
+'---' '---' '---' '---' '---' '---' '---' '---'
+                                        - Joan Stark
+--------------------------------------------------------------------------------------------------------------------------------
 ```
 
 And it is done. This stage was short in terms of work but not in terms of spend time.
